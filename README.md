@@ -24,6 +24,7 @@ NekoScript has a different concept which are the use of package as a BDScript Ru
     - [Using Components](#using-components)
     - [Running result](#running-result)
     - [Upcoming Features](#upcoming-features)
+  - [Links](#links)
 
 ## Installation
 
@@ -58,7 +59,7 @@ const nekoscript = require("nekoscript");
 
 // Creating a runtime from code input
 const NekoRuntime = nekoscript.NekoRuntime
-    .fromInput("I am the result of code $log[I am logging this text]");
+    .fromInput("myRuntime", "I am the result of code $log[I am logging this text]");
 ```
 
 ### Using Components
