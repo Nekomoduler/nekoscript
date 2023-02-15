@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "target": "ES5",
+        "module": "CommonJS",
+        "moduleResolution": "nodenext",
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "declaration": true,
+        "rootDir": "src",
+        "outDir": "lib"
+    },
+    "include": [
+        "src"
+    ]
+}

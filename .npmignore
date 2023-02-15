@@ -1,0 +1,9 @@
+src
+dev
+node_modules
+index.js
+test.js
+.npmignore
+.gitignore
+.yarnignore
+.env
