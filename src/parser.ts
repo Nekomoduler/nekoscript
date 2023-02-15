@@ -34,7 +34,7 @@ class ASTNode {
 class CallNode extends ASTNode {
     public argument?: ArgumentNode;
     public isUsingArgument: boolean;
-    public visit(runtime: NekoRuntime) {
+    public async visit(runtime: NekoRuntime) {
         let FnResult = runtime.findMethod(`${this.toString()}`); // Trying to find the function
         let FnModule: Component;
 
@@ -45,8 +45,13 @@ class CallNode extends ASTNode {
 
         if (typeof FnResult === "function") {
             FnResult = FnResult.apply(FnModule, [runtime, this]);
-
         }
+
+        if (FnResult instanceof Promise && typeof FnResult?.then === "function") {
+            FnResult = await FnResult;
+            // Add catch
+        }
+
         if (this.isUsingArgument || !this.argument)
                 return FnResult;
 
@@ -82,25 +87,42 @@ class ArgumentNode extends ASTNode {
         return this.arguments[index];
     }
 
-    public ExecuteArgument(index: number, runtime: NekoRuntime) {
-        return this.arguments[index].map(
-            x => x.visit(runtime)
-        );
+    public async ExecuteArgument(index: number, runtime: NekoRuntime) {
+        // return Promise.all(this.arguments[index].map(
+        //     x => x.visit(runtime)
+        // ));
+
+        const result = [];
+        for (const item of this.arguments[index]) {
+            result.push(await item.visit(runtime));
+        }
+
+        return result;
     }
 
 
-    public ExecuteAllArgument(runtime: NekoRuntime) {
-        return this.arguments.map(
-            (_, xi) => this.ExecuteArgument(xi, runtime)
-        );
+    public async ExecuteAllArgument(runtime: NekoRuntime) {
+        // return Promise.all(this.arguments.map(
+        //     async (_, xi) => await this.ExecuteArgument(xi, runtime)
+        // ));
+        const result = [];
+        for (let i = 0; i < this.arguments.length; i++) {
+            result.push(await this.ExecuteArgument(i, runtime));
+        }
+
+        return result;
     }
 
     public get Size() {
         return this.arguments.length;
     }
 
-    public visit(runtime: NekoRuntime) {
-        const result = this.arguments.map(x => x.map(v => v.visit(runtime)).join(''));
+    public async visit(runtime: NekoRuntime) {
+        // const result = await Promise.all(this.arguments.map(
+        //     async x => ( await Promise.all(x.map(v => v.visit(runtime))) ).join('')
+        // ));
+
+        const result = (await this.ExecuteAllArgument(runtime)).map(x => x?.join?.(''));
 
         return `[${result.join(';')}${this.IsClosed ? "]" : ""}`;
     }
@@ -124,8 +146,12 @@ class ProgramNode extends ASTNode {
         return this.arguments.map(x => x.toString()).join('');
     }
 
-    public visit(runtime: NekoRuntime) {
-        const result = this.arguments.map(x => x.visit(runtime));
+    public async visit(runtime: NekoRuntime) {
+        // const result = await Promise.all(this.arguments.map(x => x.visit(runtime)));
+        const result = [];
+        for (const item of this.arguments) {
+            result.push(await item.visit(runtime));
+        }
 
         return result.join('');
     }

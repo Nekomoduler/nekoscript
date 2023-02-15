@@ -4,55 +4,58 @@ import type { CallNode } from "../parser";
 
 class StandardLibrary extends Component {
     public constructor() {
-        super("StandardLibrary", "NekoScript", new Version(1, 0, 0));
+        super("StandardLibrary", "NekoScript", new Version(0, 0, 2));
     }
 
-    public $typeof(runtime: NekoRuntime, node: CallNode) {
+    public async $typeof(runtime: NekoRuntime, node: CallNode) {
         if (!node.argument || !(node.argument.Size && node.argument.getArgument(0)?.length)) 
             throw new Error("$typeof requires one argument of object!");
 
         node.isUsingArgument = true;
-        return typeof super.SafeWrapValue(node.argument.ExecuteArgument(0, runtime), { outputAsString: true });
+        const arg = await node.argument.ExecuteArgument(0, runtime);
+        return typeof super.SafeWrapValue(arg, { outputAsString: true });
     }
 
-    public $len(runtime: NekoRuntime, node: CallNode) {
+    public async $len(runtime: NekoRuntime, node: CallNode) {
         if (!node.argument || !(node.argument.Size && node.argument.getArgument(0)?.length))
             throw new Error("$len requires one argument of (length/size)-like object");
 
         node.isUsingArgument = true;
-        let arg = super.SafeWrapValue(node.argument.ExecuteArgument(0, runtime));
+        
+        let arg = super.SafeWrapValue(await node.argument.ExecuteArgument(0, runtime));
 
 
         return (arg as any)?.size || arg?.length;
     }
 
-    public $set(runtime: NekoRuntime, node: CallNode) {
+    public async $set(runtime: NekoRuntime, node: CallNode) {
         if (!node.argument || !(node.argument.Size && node.argument.getArgument(0)?.length))
             throw new Error("$get requires one argument of string");
             
         node.isUsingArgument = true;
-        const [key, value] = node.argument?.ExecuteAllArgument?.(runtime);
+        const [key, value] = await node.argument.ExecuteAllArgument(runtime);
         // if (!key)
         //     throw new Error("Variable Key is required to get a value");
         // No need for this check
 
         if (!super.isArgumentTypeof(key, "string"))
             throw new TypeError("Key of variable must be typeof string!");
-
+        console.log("Set")
         runtime
             .components
             .Cache
             // .get(String(super.SafeWrapValue(key, { allowAsString: true })), super.SafeWrapValue(value, { allowAsString: true })); // Improvise
             .set(this.WrapAsString(key), super.SafeWrapValue(value));
+
         return '';
     }
 
-    public $get(runtime: NekoRuntime, node: CallNode) {
+    public async $get(runtime: NekoRuntime, node: CallNode) {
         if (!node.argument || !(node.argument.Size && node.argument.getArgument(0)?.length))
             throw new Error("$get requires one argument of string");
 
         node.isUsingArgument = true;
-        const [key] = node.argument.ExecuteArgument(0, runtime);
+        const [key] = await node.argument.ExecuteArgument(0, runtime);
         // if (!key)
         //     throw new Error("Variable Key is required to get a value");
         // No need for this check
@@ -60,6 +63,7 @@ class StandardLibrary extends Component {
         if (!super.isArgumentTypeof(key, "string"))
             throw new TypeError("Key of variable must be typeof string!");
         
+        console.log("Get")
         return runtime
         .components
         .Cache
@@ -68,9 +72,9 @@ class StandardLibrary extends Component {
 
     }
 
-    public $export(runtime: NekoRuntime, node: CallNode) {
+    public async $export(runtime: NekoRuntime, node: CallNode) {
         node.isUsingArgument = true;
-        const [key] = node.argument?.ExecuteAllArgument?.(runtime) || [];
+        const [key] = await node.argument?.ExecuteAllArgument?.(runtime) || [];
         if (!key)
             throw new Error("Variable Key is required to export a value");
 
@@ -78,34 +82,35 @@ class StandardLibrary extends Component {
         return '';
     }
 
-    public $log(runtime: NekoRuntime, node: CallNode) {
+    public async $log(runtime: NekoRuntime, node: CallNode) {
         if (!node.argument || !(node.argument.Size && node.argument.getArgument(0)?.length))
             throw new Error("$log requires at least one argument of string");
 
         node.isUsingArgument = true;
-        console.log(...node.argument.ExecuteAllArgument(runtime).map(
+        console.log(...(await node.argument.ExecuteAllArgument(runtime)).map(
             x => super.SafeWrapValue(x, { outputAsString: true })
         ));
         return '';
     }
 
-    public $warn(runtime: NekoRuntime, node: CallNode) {
+    public async $warn(runtime: NekoRuntime, node: CallNode) {
         node.isUsingArgument = true;
-        console.warn(...super.SafeWrapValue(node.argument?.ExecuteAllArgument?.(runtime)));
+        console.warn(...super.SafeWrapValue(await node.argument?.ExecuteAllArgument?.(runtime)));
         return '';
     }
 
-    public $error(runtime: NekoRuntime, node: CallNode) {
+    public async $error(runtime: NekoRuntime, node: CallNode) {
         node.isUsingArgument = true;
-        console.error(...super.SafeWrapValue(node.argument?.ExecuteAllArgument?.(runtime)));
+        console.error(...super.SafeWrapValue(await node.argument?.ExecuteAllArgument?.(runtime)));
         return '';
     }
 
-    public $time(runtime: NekoRuntime, node: CallNode) {
+    public async $time(runtime: NekoRuntime, node: CallNode) {
         if (!node.argument || !(node.argument.Size && node.argument.getArgument(0)?.length))
             throw new Error("$time requires one argument of string");
 
-        const label = super.SafeWrapValue(node.argument.ExecuteArgument(0, runtime), { outputAsString: true });
+        const arg = await node.argument.ExecuteArgument(0, runtime);
+        const label = super.SafeWrapValue(arg, { outputAsString: true });
         if (typeof label !== "string")
             throw new TypeError("label must be typeof string!");
 
@@ -114,11 +119,12 @@ class StandardLibrary extends Component {
         return '';
     }
 
-    public $timeEnd(runtime: NekoRuntime, node: CallNode) {
+    public async $timeEnd(runtime: NekoRuntime, node: CallNode) {
         if (!node.argument || !(node.argument.Size && node.argument.getArgument(0)?.length))
             throw new Error("$time requires one argument of string");
 
-        const label = super.SafeWrapValue(node.argument.ExecuteArgument(0, runtime), { outputAsString: true });
+        const arg = await node.argument.ExecuteArgument(0, runtime);
+        const label = super.SafeWrapValue(arg, { outputAsString: true });
         if (typeof label !== "string")
             throw new TypeError("label must be typeof string!");
             
@@ -127,11 +133,12 @@ class StandardLibrary extends Component {
         return '';
     }
 
-    public $count(runtime: NekoRuntime, node: CallNode) {
+    public async $count(runtime: NekoRuntime, node: CallNode) {
         if (!node.argument || !(node.argument.Size && node.argument.getArgument(0)?.length))
             throw new Error("$time requires one argument of string");
 
-        const label = super.SafeWrapValue(node.argument.ExecuteArgument(0, runtime), { outputAsString: true });
+        const arg = await node.argument.ExecuteArgument(0, runtime);
+        const label = super.SafeWrapValue(arg, { outputAsString: true });
         if (typeof label !== "string")
             throw new TypeError("label must be typeof string!");
             
@@ -140,11 +147,12 @@ class StandardLibrary extends Component {
         return '';
     }
 
-    public $countReset(runtime: NekoRuntime, node: CallNode) {
+    public async $countReset(runtime: NekoRuntime, node: CallNode) {
         if (!node.argument || !(node.argument.Size && node.argument.getArgument(0)?.length))
             throw new Error("$time requires one argument of string");
 
-        const label = super.SafeWrapValue(node.argument.ExecuteArgument(0, runtime), { outputAsString: true });
+        const arg = await node.argument.ExecuteArgument(0, runtime);
+        const label = super.SafeWrapValue(arg, { outputAsString: true });
         if (typeof label !== "string")
             throw new TypeError("label must be typeof string!");
             

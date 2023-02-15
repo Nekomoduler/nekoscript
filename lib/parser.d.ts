@@ -13,7 +13,7 @@ declare class ASTNode {
 declare class CallNode extends ASTNode {
     argument?: ArgumentNode;
     isUsingArgument: boolean;
-    visit(runtime: NekoRuntime): any;
+    visit(runtime: NekoRuntime): Promise<any>;
 }
 declare class ArgumentChildren extends Array<ASTNode> {
 }
@@ -25,10 +25,10 @@ declare class ArgumentNode extends ASTNode {
     push(...astTokens: ASTNode[][]): number;
     getManyArguments(start?: number, end?: number): ArgumentChildren[];
     getArgument(index: number): ArgumentChildren;
-    ExecuteArgument(index: number, runtime: NekoRuntime): any[];
-    ExecuteAllArgument(runtime: NekoRuntime): any[][];
+    ExecuteArgument(index: number, runtime: NekoRuntime): Promise<any[]>;
+    ExecuteAllArgument(runtime: NekoRuntime): Promise<any[]>;
     get Size(): number;
-    visit(runtime: NekoRuntime): string;
+    visit(runtime: NekoRuntime): Promise<string>;
 }
 declare class ProgramNode extends ASTNode {
     private readonly _strict;
@@ -36,7 +36,7 @@ declare class ProgramNode extends ASTNode {
     constructor(isStrict: boolean);
     push(...astTokens: ASTNode[]): number;
     toString(): string;
-    visit(runtime: NekoRuntime): string;
+    visit(runtime: NekoRuntime): Promise<string>;
 }
 /**
  * Lexer Token Input Reader

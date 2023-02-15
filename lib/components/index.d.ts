@@ -1,3 +1,4 @@
 import { NekoComponent } from "./Neko";
 import { StandardLibrary } from "./Standards";
-export { NekoComponent, StandardLibrary };
+import { Collections } from "./Collections";
+export { NekoComponent, StandardLibrary, Collections };

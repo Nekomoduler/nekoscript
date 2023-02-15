@@ -16,7 +16,7 @@ declare class NekoRuntime {
     get Global(): ComponentExtensions;
     findMethod(name: string): any;
     findComponent(name: string): import("./Component").Component;
-    run(runtime?: NekoRuntime): string;
+    run(runtime?: NekoRuntime): Promise<string>;
     static fromInput(runtimeName: string, input: string): NekoRuntime;
 }
 export default NekoRuntime;
