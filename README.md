@@ -59,6 +59,7 @@ const nekoscript = require("nekoscript");
 
 // Creating a runtime from code input
 const NekoRuntime = nekoscript.NekoRuntime
+  //.fromInput("runtimeName", "code input");
     .fromInput("myRuntime", "I am the result of code $log[I am logging this text]");
 ```
 
@@ -70,17 +71,12 @@ We also have provided some built-in presets components ready for use. These are 
 
 One of them can be used like the example below:
 ```ts
-// As a global component
+// Registering components
 NekoRuntime.Global
-.add(new nekoscript.NativeComponents.StandardLibrary(), "std");
+  .Add(new nekoscript.NativeComponents.StandardLibrary(), "std");
 
-// or, as a local component
-NekoRuntime.components
-.add(new nekoscript.NativeComponents.StandardLibrary(), "std");
-
-// Enabling components to runtime
-// Same for local use
-NekoRuntime.Global.using("std");
+// Enabling components for local use
+NekoRuntime.Global.Register("std");
 ```
 
 ### Running result
@@ -89,15 +85,13 @@ Executing the runtime is the easiest of all procedures, its a one-liner like thi
 NekoRuntime.run();
 
 // or, you can log the output
-console.log(NekoRuntime.run());
+NekoRuntime.run().then(console.log)
 ```
 
 ### Upcoming Features
 > These features that are listed are not guaranteed and may change over time:
-- **Promise-based system:** Allowing the use for async methods (as example: Fetching or Sending data, Downloading Files)
 - **Discord Client Support:** Creating bot applications in Discord using NekoScript
 - **Extended Native Components:** Enabling data storing capability by the use of List in code
-- **NekoPocket Database:** A Database center, scaling horizontally using PocketBase as *the base*
 
 ## Links
 - **Discord Server:** [Join here](https://discord.gg/pX3UhdPmQE "NekoScript Community Server")

@@ -1,3 +1,4 @@
+import { NekoLog } from ".";
 import type { Component } from "./Component";
 import { NotImplementedError } from "./errors";
 import NekoRuntime from "./NekoRuntime";
@@ -48,7 +49,10 @@ class CallNode extends ASTNode {
         }
 
         if (FnResult instanceof Promise && typeof FnResult?.then === "function") {
-            FnResult = await FnResult;
+            FnResult = await FnResult.catch(x => {
+                NekoLog.Error(x);
+                // return x;
+            });
             // Add catch
         }
 
@@ -167,7 +171,14 @@ class LTIReader {
     public constructor(private _input: LexerTokenInput[], public programNode: ProgramNode) {}
 
     public get current() {
-        return this.input[this.index];
+        const t = this.input[this.index];
+
+        if (!t && !this.eof) 
+            throw new Error(`found explicit object of '${typeof t === "object" ? JSON.stringify(t) : typeof t}' while reading!`);
+
+
+       
+        return t;
     }
     public next() {
         this.index += 1;
@@ -182,6 +193,9 @@ class LTIReader {
 }
 
 const parse = (input: LexerTokenInput[]) => {
+    if (! (Array.isArray(input) && input?.length > 0))
+        throw new TypeError("input must be instanceof Array!");
+
     const node = new ProgramNode(null);
     const reader = new LTIReader(input, node);
 
@@ -198,6 +212,9 @@ const parse = (input: LexerTokenInput[]) => {
 const ILG_CALL_REGEX = /\W/;
 
 const parseAtom = (reader: LTIReader) => {
+    if (! (reader instanceof LTIReader))
+        throw new TypeError("reader must be instanceof LTTReader!");
+
     const node = reader.current;
 
     switch (node.type /* Atom Parser */) {
@@ -237,6 +254,9 @@ const parseAtom = (reader: LTIReader) => {
 }
 
 const parseArgument = (reader: LTIReader) => {
+    if (! (reader instanceof LTIReader))
+        throw new TypeError("reader must be instanceof LTTReader!");
+
     let closeNode: LexerTokenInput;
     let instance = new ArgumentNode(reader.current);
     let arg = new ArgumentChildren();

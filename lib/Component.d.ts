@@ -31,9 +31,6 @@ declare class Component {
     isArgumentTypeof(argument: ArgumentChildren, type: "string" | "number" | "symbol" | "bigint" | "boolean" | "function" | "object" | "undefined"): boolean;
     private _handleToString;
     WrapAsString(argument: ArgumentChildren, joinString?: string): string;
-    /**
-     * Requires improvements
-     */
     SafeWrapValue(args: any, options?: {
         outputAsString?: boolean;
     }): any;
@@ -45,6 +42,20 @@ declare class CacheModule {
     delete(name: string): boolean;
     clear(name: string): void;
 }
+declare class ComponentManager extends Component {
+    private readonly _isGlobal?;
+    protected Registered: Map<string, Component>;
+    protected RegisteredMethods: Map<string, any>;
+    protected MethodsFromComponent: Map<string, Component>;
+    protected _cache: CacheModule;
+    constructor(_isGlobal?: boolean);
+    get cache(): CacheModule;
+    getMethod(name: string): any;
+    getComponentByName(name: string): Component;
+    Register(libName: string, regName?: string): void;
+    Add(component: Component, name?: string): this;
+    Remove(libName: string): boolean;
+}
 declare class ComponentExtensions extends Component {
     private readonly _isGlobal?;
     protected Registered: Map<string, Component>;
@@ -55,8 +66,8 @@ declare class ComponentExtensions extends Component {
     get componentNames(): string[];
     get componentEntries(): string[];
     componentVersion(componentName: string): string;
-    Register(component: Component, asName: string): void;
-    Using(filename: string, asName?: string): Component;
+    Register(component: Component, asName?: string): void;
+    using(filename: string, asName?: string): Component;
     getMethod(name: string): any;
     getComponentFromName(name: string): Component;
     get(componentName: string): Component;
@@ -65,4 +76,4 @@ declare class ComponentExtensions extends Component {
     remove(componentName: string): boolean;
     static warnOnLoad(): void;
 }
-export { Component, Version, ComponentExtensions };
+export { Component, Version, ComponentExtensions, ComponentManager };

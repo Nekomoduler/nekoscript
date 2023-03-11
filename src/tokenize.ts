@@ -1,14 +1,40 @@
+import { NekoLog } from ".";
+
 type TokenType = "lex_static" | "lex_call" | "lex_open" | "lex_close" | "lex_coma";
 
 class TokenInput {
-    constructor(public value: string, public type: TokenType, public indexAt: number, public indexEnd: number, public lineStart: number, public lineEnd: number) {
+    constructor(
+        public value: string, 
+        public type: TokenType, 
+        public indexAt: number, 
+        public indexEnd: number, 
+        public lineStart: number, 
+        public lineEnd: number
+        ) {
 
     }
 }
 
+const TokenGrammar = {
+    CALL_OP: "$",
+    OPEN_OP: "[",
+    CLOSE_OP: "]",
+    COMA_OP: ";"
+}
+
 const tokenizeInput = (input: string) => {
+    if (! (typeof input === "string" && input?.length))
+        throw new TypeError("input must be typeof string!");
+
     let i = 0;
     let tokens: TokenInput[] = [];
+    const grammar = [
+        TokenGrammar.CALL_OP,
+        TokenGrammar.OPEN_OP,
+        TokenGrammar.CLOSE_OP,
+        TokenGrammar.COMA_OP,
+        "\\"
+    ]
 
     let type: TokenType = "lex_static";
     let value: string = "";
@@ -28,7 +54,7 @@ const tokenizeInput = (input: string) => {
         switch(input[i]) {
             case (characterEscape ? input[i] : ''): {
                 let _allow = false;
-                if (["$", "[", "]", ";", "\\"].includes(input[i]))
+                if (grammar.includes(input[i]))
                     _allow = true;
                 _type = "lex_static";
                 if (type !== "lex_static") {
@@ -40,27 +66,27 @@ const tokenizeInput = (input: string) => {
                 characterEscape = false;
                 break;
             }
-            case "$": {
+            case TokenGrammar.CALL_OP: {
                 _type = "lex_call";
-                _value = "$";
+                _value = TokenGrammar.CALL_OP;
 
                 break;
             };
-            case "[": {
+            case TokenGrammar.OPEN_OP: {
                 _type = "lex_open";
-                _value = "[";
+                _value = TokenGrammar.OPEN_OP;
 
                 break;
             };
-            case "]": {
+            case TokenGrammar.CLOSE_OP: {
                 _type = "lex_close";
-                _value = "]";
+                _value = TokenGrammar.CLOSE_OP;
 
                 break;
             };
-            case ";": {
+            case TokenGrammar.COMA_OP: {
                 _type = "lex_coma";
-                _value = ";";
+                _value = TokenGrammar.COMA_OP;
 
                 break;
             };
@@ -108,11 +134,14 @@ const tokenizeInput = (input: string) => {
     if (!tokens[0].value)
         tokens.shift();
 
+    NekoLog.Info(`Tokenized code input into ${tokens.length} tokens`);
+
     return tokens;
 }
 
 export {
     tokenizeInput,
     TokenInput,
-    TokenType
+    TokenType,
+    TokenGrammar
 }

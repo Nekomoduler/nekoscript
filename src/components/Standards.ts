@@ -40,10 +40,10 @@ class StandardLibrary extends Component {
 
         if (!super.isArgumentTypeof(key, "string"))
             throw new TypeError("Key of variable must be typeof string!");
-        console.log("Set")
+
         runtime
             .components
-            .Cache
+            .cache
             // .get(String(super.SafeWrapValue(key, { allowAsString: true })), super.SafeWrapValue(value, { allowAsString: true })); // Improvise
             .set(this.WrapAsString(key), super.SafeWrapValue(value));
 
@@ -63,10 +63,9 @@ class StandardLibrary extends Component {
         if (!super.isArgumentTypeof(key, "string"))
             throw new TypeError("Key of variable must be typeof string!");
         
-        console.log("Get")
         return runtime
         .components
-        .Cache
+        .cache
         // .get(String(super.SafeWrapValue(key, { allowAsString: true }))); // Key value in array is all string
         .get(this.WrapAsString(key));
 
@@ -87,7 +86,7 @@ class StandardLibrary extends Component {
             throw new Error("$log requires at least one argument of string");
 
         node.isUsingArgument = true;
-        console.log(...(await node.argument.ExecuteAllArgument(runtime)).map(
+        console.dir(...(await node.argument.ExecuteAllArgument(runtime)).map(
             x => super.SafeWrapValue(x, { outputAsString: true })
         ));
         return '';
